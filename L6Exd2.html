@@ -1,0 +1,62 @@
+<html>
+   <head>
+     <script>
+       // Массивогенератор линейный с заданной длинной N
+       let massiv = [];
+       let trigger = +prompt("Будет использован заранее заданный массив," + "\nлибо введите \"1\" для набора массива вручную, ","");
+       if (trigger == 1) {
+        let J = +prompt("Введите длину массива J","");
+        if (J > 0){
+          for( let i = 0; i <= (J-1); i++){
+              massiv[i] = prompt("Введите значение для позиции " + (i+1) + "\nНапишите \"break\" для остановки");
+              if (massiv[i] == "break") { // Стоп-слово
+                 massiv.pop(i)
+                 break;
+              };
+           };
+         } else alert("Массив нулевой!");
+        } else {
+           massiv = [11, 69, 11, 11, 69, 69, 2008, 56, 56]; // либо заранее заданный массив
+        };
+        // Объявляем ассоциативный массив
+        let popular = new Map();
+        // Перебором записываем в него наибольшие повторения и их количество
+        for (let i=0; i < massiv.length; i++){
+           let fr = 1; // Повторения по умолчанию
+           for (let j = 0; j < massiv.length; j++ ){
+              if (massiv[j] == massiv[i] && j != i){
+                 popular.set(massiv[j], ++fr);
+              };
+           };
+        };
+        console.log(popular);
+        // Разделяем на 2 массива
+        let keys = Array.from(popular.keys());
+        let values = Array.from(popular.values());
+        console.log(keys); // Числа
+        console.log(values); // Количество
+        // Присваиваем максимумы первым значениям массивов
+        let MaxRaz = values[0];
+        let Bolshe = keys[0];
+        // перебираем циклом массивы
+        for (let i = 0; i < values.length; i++){
+           if (values[i] > MaxRaz){
+              // Если частота наибольшая, то обновляем максимумы
+              MaxRaz = values[i];
+              Bolshe = keys[i];
+              // Ecли частоты одинаковые, то перезаписываем большее
+           } else if ((MaxRaz == values[i]) && (keys[i] > Bolshe)){
+              Bolshe = keys[i];
+           };
+        };
+        alert(`В заданном массиве число ${Bolshe} встречается ${MaxRaz} раз, а также является наибольшим из часто встречающихся.`);
+        console.log(Bolshe);
+       
+
+
+       
+     </script>
+   </head>
+   <body>
+   </body>
+</html>

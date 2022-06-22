@@ -1,0 +1,98 @@
+<html>
+   <head>
+     <script>
+        // Заполняем треугольный массив
+        document.write("Треугольная прямоугольная матрица:" + "<br>");
+        let massivTri = [];
+        let N = +prompt("Введите размерность массива N","");
+        //Для заполнения массива нолями
+        for (let i = 0; i < N; i++ ) {
+                 massivTri[i] = [];
+             for (let j = 0; j < N; j++){
+                    massivTri[i][j] = 0;                  
+                 };
+        };
+        // Развилка
+        switch (+prompt("\"1\" для ручного ввода массива, \n\"2\" для генерации случайного массива со значениями 0-100")){
+           //Ручной ввод
+           case 1:    
+              document.write("massivTri" + "<br>");
+              for (let i = 0; i < N; i++ ) {
+               massivTri[i] = 0
+                 for (let j = i; j < N; j++){
+                    massivTri[i][j] = Number(prompt("Введите значение для ячейки " + (i+1) + ", " + (j+1) ));
+                 };
+                 document.write(massivTri[i] + "<br>")
+              };
+              break;
+            //Случайный ввод
+           case 2:
+              for (let i = 0; i < N; i++ ) {
+                 for (let j = i; j < N; j++){
+                    massivTri[i][j] = Math.round(Math.random()*100);
+                 };
+                 document.write(massivTri[i] + "<br>")
+              };
+              break;
+              default:
+                 alert("Вычисления не произведены!")
+            break;
+        };
+        // Заполняем единичную матрицу, 
+        document.write("Единичная матрица:" + "<br>");
+        let massivEd = [];
+        //Для заполнения массива нолями
+        for (let i = 0; i < N; i++ ) {
+                 massivEd[i] = [];
+             for (let j = 0; j < N; j++){
+                    massivEd[i][j] = 0;                  
+                 };
+         };
+         for (let i = 0; i < N; i++){
+            massivEd[i][i] = 1;
+            document.write(massivEd[i] + "<br>");
+         };
+         // Заполняем транспонированную матрицу
+         let massivTT = [];
+         document.write("Транспонированная треугольная матрица:" + "<br>");
+         for (let i = 0; i < N; i++){
+            massivTT[i] = []
+            for (let j = 0; j < N; j++){
+               massivTT[i][j] = massivTri[j][i];
+            };
+            document.write(massivTT[i] + "<br>")
+         };
+         // Вычисляем возведение матрицы в квадрат
+         let massivSqr = [];
+         let sum;
+         document.write("Треугольная матрица в квадрате:" + "<br>");
+         for (let i = 0; i < N; i++){
+            massivSqr[i] = [];
+         };
+         for (let k = 0; k < N; k++){
+            for (let i = 0; i < N; i++){
+               sum = 0;
+               for (let j = 0; j < N; j++){
+                  sum += massivTri[i][j] * massivTri[j][k];   
+                  massivSqr[i][k] =+ sum;
+               };
+            };
+         };
+         for (let i = 0; i < N; i++){
+            document.write(massivSqr[i] + "<br>")
+         };
+         // Вычисляем конечный результат
+         document.write("Результат вычисления:" + "<br>");
+         let SuperMassiv = [];
+         for (i = 0; i < N; i++){
+            SuperMassiv[i] = [];
+            for (j = 0; j < N; j++){
+               SuperMassiv[i][j] = 3 * massivTT[i][j] + massivEd[i][j] + massivSqr[i][j];
+            };
+            document.write(SuperMassiv[i] + "<br>")
+         };
+     </script>
+   </head>
+   <body>
+   </body>
+</html>

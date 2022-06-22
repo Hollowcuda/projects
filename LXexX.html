@@ -1,0 +1,147 @@
+<html>
+   <head>
+     <script>
+       let M; // Переменная размера массива
+       let SMatrix = []; // Задаем массив
+       document.write("Исходная матрица S:" + "<br>");
+        switch (+prompt("\"1\" для ручного ввода массива, \n\"2\" для генерации случайного массива со значениями 0-100")){
+           //Ручной ввод. Цикл, вложенный в уикл для задания массива
+           case 1:
+                M = +prompt("Введите M");
+                let flag = true; // Флаг для остановки цикла
+                for (let str = 0; str < M; str++ ) {
+                SMatrix[str] = [];
+                if (flag == false){
+                  break;
+                }
+                 for (let col = 0; col < 2 * M; col++){
+                  SMatrix[str][col] = prompt("Введите значение для ячейки " + (str+1) + ", " + (col+1) + "\n\"stop\" для остановки." );
+                  if (SMatrix[str][col] == "stop"){ //Условие для экстренного выхода из цикла
+                     flag = false;
+                     SMatrix[str].pop(col);
+                     break;
+                  };
+                  document.write(SMatrix[str][col]  +  " " + "&nbsp")
+                 };
+                 document.write("<br>");
+                };
+              break;
+            //Случайный ввод. Цикл, вложенный в цикл, ГСЧ от -99 до 99
+           case 2:
+              M = +prompt("Введите M");
+              for (let str = 0; str < M; str++ ) {
+                SMatrix[str] = [];
+                 for (let col = 0; col < 2 * M; col++){
+                  SMatrix[str][col] = Math.round(Math.random() * 198) - 99;
+                  document.write(SMatrix[str][col]  +  " " + "&nbsp")
+                 };
+                 document.write("<br>");
+              };
+              break;
+              // Матрица по умолчанию
+              default:
+                SMatrix = [
+                [-79, -13, 92, 60, 80, 31],
+                [-6, 37, 36, -56, 30, 18],
+                [37, 14, -5, 7, -52, 47],
+                ];     
+                M = 3;
+                for (str = 0; str < M; str++){
+              document.write(SMatrix[str] + "<br>");
+              };
+            break;
+       };
+
+       //Разность правая
+       let RazLeft = 2 * SMatrix[0][0]; // Чтобы оставалось SMatrix[0][0] после 1го вычитания
+       //Разность левая
+       let RazRight = 2 * SMatrix[0][M]; // Чтобы оставалось SMatrix[0][M] после 1го вычитания
+       for (let str = 0; str < M; str++){
+        for (let col = 0; col < M; col++){
+            RazLeft -= SMatrix[str][col];
+        };
+        for (let col = M; col < 2 * M; col++){
+            RazRight -= SMatrix[str][col];
+        };
+       };
+       console.log(`Разность левая равна ${RazLeft}`);
+       console.log(`Разность левая равна ${RazRight}`);
+       //Сравнение разностей правой и левой половин матрицы
+       if (RazLeft > RazRight){
+          alert(`Разность элементов в левой половине больше!`);
+       } else if (RazLeft < RazRight){
+          alert(`Разность элементов в правой половине больше!`);
+       } else {
+          alert("Это невероятно, но разницы элементов в половинах равны");
+       };
+       // Расчет и вывод матрицы T
+       document.write("Матрица T:" + "<br>")
+       let TMatrix = [];
+       for (let str = 0; str < M; str++){
+            TMatrix[str] = [];
+        for (let col = 0; col < M; col++){
+         // Каждая ячейка является результатом разницы значений ячеек в 2з половинах
+             TMatrix[str][col] = SMatrix[str][col + M] - SMatrix[str][col];
+             document.write(TMatrix[str][col] +  " " + "&nbsp");
+        };
+        document.write("<br>");
+        };
+        //Рассчёт сортировки
+        let DopArr = []; // Доп.массив для записи и сортировки значений побочной диагонали
+        for (let str = 0; str < M; str++){
+            DopArr[str] = TMatrix[str][M - str - 1]; // Запись в массив элементов  побочной диагонали
+        };
+        console.log(DopArr);
+        // Если сортировать массив, то только бинарной сортировкой со вставками
+        for (let i = 1; i < DopArr.length ; i++){
+             x = DopArr[i]; //Запоминает текущее значение массива
+             left = 0; // Указатель левой границы интервала
+             right = i; // Указатель праой границы интервала
+             let m; // Для определения значения середины интервала
+             while (left <= right) { //когда left станет больше right, left будет показывать искомое положение x
+                  m = Math.floor((left + right)/2); // кругление обязательно, т.к. m будет указателем
+                  if (x > DopArr[m]){ // ">" для сортировки по возрастанию
+                     left = m + 1; // ставит левую границу правее m
+                  } else {right = m - 1}; // ставит правую границу левее m
+             };
+             // через цикл сдвигаем элементы на одну позицию после left
+             for (let j = i - 1; j >= left; j--){
+                  DopArr[j + 1] = DopArr[j];
+               };
+               DopArr[left] = x; // Записываем на позицию left исходное значение
+        };
+        //Считаем и выводим отсортированную матрицу R
+        console.log(DopArr);
+        document.write("Матрица R:" + "<br>")
+        let RMatrix = []; // Задаём матрицу 2мя циклами, переписываем матрицу T
+        for (let str = 0; str < M; str++){
+              RMatrix[str] = [];
+          for(let col = 0; col < M; col++){
+              if (col == M - str - 1){ // Условие для перезаписи значений диагонали значениями из сортированного массива
+                RMatrix[str][M - str - 1] = DopArr[str]
+                /*Запись сортированного ПО ВОЗРАСТАНИЮ массива идёт справа сверху влево вниз. т.е. в обратном порядке.
+                Такая запись обусловлена удобством положительного счёта внешнего str.
+                */
+              } else {
+                RMatrix[str][col] = TMatrix[str][col]
+                
+              };
+              document.write(RMatrix[str][col] +  " " + "&nbsp");
+          };
+          document.write("<br>");
+        };
+        // Вывод таблиц в консоль
+        console.log("Исходная матрица S:");
+        console.table(SMatrix);
+        console.log("Матрица T:");
+        console.table(TMatrix);
+        console.log("Матрица R:");
+        console.table(RMatrix);
+
+ 
+
+     </script>
+   </head>
+   <body>
+   </body>
+</html>

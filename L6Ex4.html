@@ -1,0 +1,54 @@
+<html>
+   <head>
+     <script>
+       // Массивогенератор линейный с заданной длинной N
+       let massiv = []; 
+       let trigger = +prompt("Будет использован заранее заданный массив," + "\nлибо введите \"1\" для набора массива вручную, ","");
+       if (trigger == 1) {
+        let J = +prompt("Введите длину массива J","");
+        if (J > 0){
+          for( let i = 0; i <= (J-1); i++){
+              massiv[i] = prompt("Введите значение для позиции " + (i+1) + "\nНапишите \"break\" для остановки");
+              if (massiv[i] == "break") { // Стоп-слово
+                 massiv.pop(i)
+                 break;
+              };
+           };
+         } else alert("Массив нулевой!");
+        } else {
+           massiv = [56, 34, 11, 5, 69, 76, 2008, 18, 63]; // либо заранее заданный массив
+        };
+
+        document.write(massiv + "<br>");
+        //Задание 4
+        let left;
+        let right;
+        let x;
+        let m;
+        for (i = 1; i < massiv.length; i++){
+             x = massiv[i];
+             left = 0;
+             right = i;
+             while (left <= right) {
+                  m = Math.floor((left + right)/2);
+                  if (x > massiv[m]){
+                     left = m + 1;
+                  } else if (x < massiv[m]){
+                     right = m - 1;
+                  } else break;
+                  console.log(`Внутренний цикл i=${i} x=${x} left=${left} right=${right} m=${m} massiv[m]=${massiv[m]}`);
+             };
+             for (let j = i - 1; j >= left; j--){
+                  massiv[j + 1] = massiv[j];
+               };
+               massiv[left] = x;
+               console.log(`Внешний цикл i=${i} x=${x} left=${left} right=${right} m=${m} massiv[m]=${massiv[m]}`);
+         };
+         document.write(massiv.reverse());
+        
+        
+     </script>
+   </head>
+   <body>
+   </body>
+</html>

@@ -1,0 +1,66 @@
+<html>
+   <head>
+     <script>
+       // Массивогенератор линейный с заданной длинной N
+       let massiv = []; 
+       let trigger = +prompt("Будет использован заранее заданный массив," + "\nлибо введите \"1\" для набора массива вручную, ","");
+       if (trigger == 1) {
+        let N = +prompt("Введите длину массива","");
+        if (N > 0){
+          for( let i = 0; i <= (N-1); i++){
+              massiv[i] = prompt("Введите значение для позиции " + (i+1) + "\nНапишите \"break\" для остановки");
+              if (massiv[i] == "break") { // Стоп-слово
+                 massiv.pop(i)
+                 break;
+              };
+           };
+         } else alert("Массив нулевой!");
+        } else {
+           massiv = [56, 34, 11, 5, 69, 76, 2008, 18, 63]; // либо заранее заданный массив
+        };
+
+       document.write(massiv);
+        //Задание 3
+        let Minpos; 
+        let Maxpos; // Переменные для хранения позиций максимума и минимума
+        let Min = massiv[0];
+        // Цикл, перебирающий массив и записывающий минимальное значение и его позицию
+        for (let i = 0; i <= massiv.length - 1; i++){
+           if (massiv[i] <= Min){
+              Min = massiv[i];
+              Minpos = i;
+           };
+        };
+        let Max = massiv[0];
+        // Цикл, перебирающий массив и записывающий максимальное значение и его позицию
+        for (let i = 0; i <= massiv.length - 1; i++){
+           if (massiv[i] >= Max){
+              Max = massiv[i];
+              Maxpos = i;
+           };
+        };
+        // Проверка, которая определяет, какой из эстремумов находится левее, а какой правее.
+        
+        let left;
+        let right;
+        console.log(`Minpos=${Minpos} Maxpos=${Maxpos}`);
+        if (Minpos < Maxpos) {
+           left = Minpos;
+           right = Maxpos;          
+        } else if (Minpos > Maxpos) {
+           right = Minpos;
+           left = Maxpos;
+        } else alert("Максимум равен минимуму!");
+        console.log(`left=${left} right=${right}`);
+        // Циклом находим произведение
+        let multi = (right - left > 1) ? 1 : 0; // Проверка терненарным оператором соседства максимального и минимального
+        for (let i = left + 1 ; i < right; i++) { // left + 1 для невключения "левого"
+            multi *= massiv[i];
+        };
+       alert(`Произведение всех элементов массива, расположенных между минимальным ${Min} и максимальным ${Max}, равно ${multi}.`);
+       
+     </script>
+   </head>
+   <body>
+   </body>
+</html>
