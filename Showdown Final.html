@@ -1,0 +1,360 @@
+<html>
+
+<head>
+   <script>
+      class Standings {
+         constructor(stages) {
+            this.RunnersArray = new Array();             // массив для хранения объектов-гонщиков
+            this.CountryList = new Set()                 // массив для храниения списка стран
+            this.Lap1Results = new Array();              // массив для хранения результатов этапов 1го круга
+            this.Lap2Results = new Array();              // массив для хранения результатов этапов 2го круга
+            this.SemiResults = new Array();              // массив для хранения конечных результатов 1го круга
+            this.stages = stages;                        // количество этапов, передаётся из конструктора
+         };
+         /** 
+         * Метод для добавления гонщика в общий массив
+         *
+         * @param {string} fullname полное имя гонщика.
+         * @param {string} country страна-команда гонщика.
+         * @param {array} timesFirst массив с временами на кажом участке первого круга.
+         * @param {array} timesSecond массив с временами на кажом участке второго круга.
+         * @param {number} rating рейтинг гонщика.
+         */
+         addRunner([fullname, country, timesFirst, timesSecond, rating]) {
+            this.RunnersArray.push({ fullname: fullname, country: country, timesFirst: timesFirst, timesSecond: timesSecond, rating: rating });
+         };
+         /** 
+         * Метод для фильтрации массива объектов по заданному параметру
+         *
+         * @param {array} arrayIn входной массив.
+         * @param {string} prop название параметра.
+         * @param {string} value значение параметра для сортировки.
+         * @return {array} arrayOut , возврат фильтрованного массива объектов.
+         */
+         filterArray(arrayIn, prop, value) {
+            let arrayOut = new Array();
+            for (let item of arrayIn) {
+               if (item[prop] == value) {
+                  arrayOut.push(item)
+               };
+            };
+            return arrayOut
+         };
+         /** 
+         * Метод для сортировки массива объектов по заданному параметру 
+         *
+         * @param {array} arrayIn входной массив.
+         * @param {string} propname название параметра.
+         * @param {string} value значение параметра для сравнения.
+         * @param {boolean} direction значение для направления сортировки (убывание по умолчанию)
+         * @return {array} arrayOut , возврат сортированного массива объектов.
+         */
+         sortArray(arrayIn, propname, value, direction = false) {
+            let arrayOut = new Array();
+            arrayOut = arrayIn.sort(function (a, b) {
+               let DirVar = a[propname][value] > b[propname][value];
+               if (direction == true) { DirVar = a[propname][value] < b[propname][value] }
+               if (DirVar == true) {
+                  return -1
+               };
+            });
+            return arrayOut
+         };
+         // Метод для создания списка стран (команд)
+         CreateCountryList() {
+            for (let item of this.RunnersArray) {
+               this.CountryList.add(item.country);
+            };
+         };
+         /** 
+         * Метод для вывода результатов одного этапа на первом круге 
+         *
+         * @param {number} StNum номер этапа.
+         * @return {array} , возврат отсортированного по возрастанию массива с резуьтатами первого этапа (худший из каждой команды)
+         */
+         get1LStageStandings(StNum) {
+            console.log(`Результаты для этапа ${StNum + 1}`);
+            let StageArray = new Array();
+            for (let Cntr of this.CountryList) {
+               StageArray.push(this.sortArray(this.filterArray(this.RunnersArray, "country", Cntr), "timesFirst", StNum)[0]);
+            };
+            this.Lap1Results.push(this.sortArray(StageArray, "timesFirst", StNum).reverse());
+            return this.sortArray(StageArray, "timesFirst", StNum).reverse()
+         };
+         /**
+         * Метод для расчёта результатов первого круга и отбора топ-команды
+         * 
+         * @return {array} this.SemiResults, возврат массива с результатами формата [команда, сумма мест, рейтинг лучшего гонщика]
+         */
+         CalculateSemi() {
+            for (let i = 0; i < this.stages; i++) {
+               console.log(this.get1LStageStandings(i));
+            }
+            console.log("Результаты первого круга:");
+            console.log(this.Lap1Results);
+            let ResultArray = new Array();
+
+            for (let Ctry1 of this.CountryList) {
+               ResultArray.push([Ctry1, 0, StandDef.getBestRnkCtry(Ctry1)]);
+            };
+            for (let stage = 0; stage < this.stages; stage++) {
+               for (let pos = 0; pos < this.CountryList.size; pos++) {
+                  for (let Ctry of ResultArray) {
+                     if (Ctry[0] == this.Lap1Results[stage][pos].country) {
+                        Ctry[1] += (pos + 1);
+                     }
+                  }
+               }
+            }
+
+            let L1SortedRes = new Array();
+            L1SortedRes = ResultArray.sort(function (a, b) {
+               if (a[1] < b[1]) {
+                  return -1
+               } else if (a[1] == b[1]) {
+                  if (a[2] < b[2]) {
+                     return -1
+                  };
+               };
+            });
+            
+            this.SemiResults = L1SortedRes.slice(0, 4);
+            console.log("Топ-4 первого круга:");
+            console.log(this.SemiResults);
+            return this.SemiResults
+         }
+         /** 
+         * Метод расчёта рейтинга лучшего гонщика страны (комнады)
+         * 
+         * @param {string} country название команды.
+         * @return {number} Best[0].rating, возврат рейтинга лушчего гонщика
+         */
+         getBestRnkCtry(country) {
+            let Best = [];
+            Best = this.filterArray(this.RunnersArray, "country", country).sort(function (a, b) {
+               if (a.rating < b.rating) return -1;
+            })
+            return Best[0].rating
+         }
+         /** 
+         * Метод расчёта среднеарифметического рейтинга гонщиков страны (комнады)
+         * 
+         * @param {string} country название команды.
+         * @return {number} Best[0].rating, возврат среднеарифметического рейтинга
+         */
+         getMedianCtry(country) {
+            let Median = [];
+            let sum = 0;
+            Median = this.filterArray(this.RunnersArray, "country", country).sort(function (a, b) {
+               if (a.rating < b.rating) return -1;
+            })
+            for (let Rnr of Median) {
+               sum += Rnr.rating;
+            }
+            return sum / Median.length;
+         }
+         /** 
+         * Метод для вывода результатов одного этапа на первом круге
+         * 
+         * @param {string} StNum номер этапа.
+         * @return {array} возврат массива с результатами этапа на втором круге (лучший от команды)
+         */
+         get2LStageStandings(StNum) {
+            console.log(`Результаты для этапа ${StNum + 1}`);
+            let StageArray = new Array();
+            for (let Cntr of this.SemiResults) {
+               StageArray.push(this.sortArray(this.filterArray(this.RunnersArray, "country", Cntr[0]), "timesSecond", StNum, true)[0]);
+            }
+            this.Lap2Results.push(this.sortArray(StageArray, "timesSecond", StNum).reverse());
+            return this.sortArray(StageArray, "timesSecond", StNum).reverse()
+         };
+         /** 
+         * Метод для расчёта результатов второго круга и отбора команды-победителя
+         * 
+         * @return {array} L2SortedRes возврат массива с результатами формата [команда, сумма мест, средний рейтинг]
+         */
+         CalculateFinals() {
+            for (let i = 0; i < 2; i++) {
+               console.log(this.get2LStageStandings(i));
+            }
+            console.log("Результаты второго круга:");
+            console.log(this.Lap2Results);
+            let ResultArray = new Array();
+            for (let Ctry2 of this.SemiResults) {
+               ResultArray.push([Ctry2[0], 0, StandDef.getMedianCtry(Ctry2[0])]);
+            };
+
+            for (let stage = 0; stage < 2; stage++) {
+               for (let pos = 0; pos < this.SemiResults.length; pos++) {
+                  for (let Ctry of ResultArray) {
+                     if (Ctry[0] == this.Lap2Results[stage][pos].country) {
+                        Ctry[1] += (pos + 1);
+                     };
+                  };
+               };
+            };
+            let L2SortedRes = new Array();
+            L2SortedRes = ResultArray.sort(function (a, b) {
+               if (a[1] < b[1]) {
+                  return -1
+               } else if (a[1] == b[1]) {
+                  if (a[2] < b[2]) {
+                     return -1
+                  };
+               };
+            });
+
+            console.log("Топ-4 второго круга:");
+            console.log(L2SortedRes);
+            alert(`${L2SortedRes[0][0]} побеждает в финале!`);
+            return L2SortedRes
+         };
+      };
+
+      //Заполняет массив, 20 гонщиков по 4 в команде
+      function MakeDefaults() {
+         for (i = 0; i < DefaultArray.length; i++) {
+            StandDef.addRunner(DefaultArray[i]);
+         };
+      };
+      /**
+      * Генератор случайных числел, от first до last
+      *
+      * @param {number} first начало диапазона ГСЧ.
+      * @param {number} last конец диапазона ГСЧ.
+      * @return {number} rnum случайно сгенерированное число.
+      */
+      function getRnd(first, last) {
+         let rnum = Math.round((Math.random() * (last - first)) + first);
+         return rnum
+      };
+      /**
+      * Метод для проверки целостности и знака вводимого числа, рекомендуется применять с prompt
+      *
+      * @param {number} num вводимое число.
+      * @return {number} num возврат числа.
+      */
+      function isPosInteger(num) {
+         if (!isFinite(num) || num <= 0 || !((num ^ 0) === num)) {
+            alert("Введено не целое положительное число!");
+            throw "Error не число";
+         };
+         return num
+      };
+
+      let DefaultArray = [
+         ["Edward Elric", "San Anima", [51, 42, 58, 47], [51, 57], 20],
+         ["Vincent Law", "San Anima", [50, 52, 43, 58], [53, 50], 65],
+         ["Motoko Kusanagi", "San Anima", [55, 46, 52, 51], [53, 50], 9],
+         ["Spyke Spiegel", "San Anima", [43, 51, 45, 60], [54, 44], 78],
+         ["Dale Cooper", "Peaks Cycling", [40, 41, 45, 59], [56, 51], 2],
+         ["Robert Briggs ", "Peaks Cycling", [54, 45, 42, 48], [47, 42], 28],
+         ["Leland Palmer", "Peaks Cycling", [40, 50, 45, 44], [59, 56], 96],
+         ["Benjamin Horne", "Peaks Cycling", [50, 53, 56, 50], [45, 53], 43],
+         ["Estinien Varlineau", "La Noscea", [52, 60, 44, 48], [48, 52], 17],
+         ["Artoirel de Fortemps", "La Noscea", [53, 53, 41, 54], [49, 47], 37],
+         ["Godbert Manderville", "La Noscea", [48, 51, 52, 57], [57, 40], 5],
+         ["Alphinaud Leveilleur", "La Noscea", [50, 56, 48, 51], [43, 45], 3],
+         ["Adam Jensen", "Gametopia", [56, 55, 56, 42], [42, 47], 58],
+         ["Squall Leonhart", "Gametopia", [51, 53, 45, 60], [50, 43], 8],
+         ["Noel Vermillion", "Gametopia", [57, 49, 60, 40], [51, 44], 13],
+         ["Maureen Corley", "Gametopia", [59, 57, 46, 58], [42, 46], 95],
+         ["Aleksandr Druz", "CHGK", [41, 55, 54, 46], [59, 43], 1],
+         ["Boris Burda", "CHGK", [50, 43, 45, 46], [56, 48], 4],
+         ["Rovshan Askerov", "CHGK", [40, 57, 50, 43], [40, 47], 38],
+         ["Anatoliy Belkin", "CHGK", [53, 52, 50, 42], [60, 57], 18]
+      ];
+      let stageNum;           // Количество этапов
+      let runnerNum;          // Количество гонщиков
+
+      switch (+prompt("Введите 1 для ручного набора; любое другое значение для загрузки умолчаний")) {
+         case 1:
+            stageNum = isPosInteger(+prompt("Введите количество этапов ", ""));
+
+            StandDef = new Standings(stageNum);
+            runnerNum = isPosInteger(+prompt("Введите количество гонщиков ", ""));
+
+            for (let i = 0; i < runnerNum; i++) {
+               let runnerName = prompt("Введите имя гонщика", "");
+               let runnerCountry = prompt("Введите страну гонщика", "");
+               let FirstArray = new Array();
+               let SecondArray = [getRnd(40, 60), getRnd(40, 60)];
+               for (let j = 0; j < stageNum; j++) {
+                  FirstArray.push(getRnd(40, 60));
+               };
+               StandDef.addRunner([runnerName, runnerCountry, FirstArray, SecondArray, getRnd(0, 100)]);
+            };
+
+            StandDef.CreateCountryList();
+            StandDef.CalculateSemi();
+
+            switch (StandDef.CountryList.size) {
+               case 1:
+                  alert("В финал прошёл " + StandDef.SemiResults[0][0] + "!");
+                  break;
+               case 2:
+                  alert("В финал прошли " + StandDef.SemiResults[0][0] + " и " + StandDef.SemiResults[1][0] + "!");
+                  break;
+               case 3:
+                  alert("В финал прошли " + StandDef.SemiResults[0][0] + ", " + StandDef.SemiResults[1][0] + " и " + StandDef.SemiResults[2][0] + "!");
+                  break;
+               default:
+                  alert("В финал прошли " + StandDef.SemiResults[0][0] + ", " + StandDef.SemiResults[1][0] + ", " + StandDef.SemiResults[2][0] + " и " + StandDef.SemiResults[3][0]);
+                  break;
+            };
+
+            switch (prompt("Введите \'stop\' для остановки, любой другой ввод для проведения 2го этапа.")) {
+               case "stop":
+                  alert(`${StandDef.SemiResults[0][0]} побеждает по результатам первого раунда!`);
+                  break;
+               default:
+                  StandDef.CalculateFinals();
+                  break;
+            };
+            break;
+         default:
+            stageNum = 4;
+            StandDef = new Standings(stageNum);
+            MakeDefaults();
+
+            switch (+prompt("Введите 1 чтобы добавить дополнительных гонщиков")) {
+               case 1:
+                  runnerNum = isPosInteger(+prompt("Сколько добавить гонщиков?"));
+                  for (let i = 0; i < runnerNum; i++) {
+                     let runnerName = prompt("Введите имя гонщика", "");
+                     let runnerCountry = prompt("Введите страну гонщика", "");
+                     StandDef.addRunner([runnerName, runnerCountry, [getRnd(40, 60), getRnd(40, 60), getRnd(40, 60), getRnd(40, 60)],
+                        [getRnd(40, 60), getRnd(40, 60)], getRnd(0, 100)]);
+                  }
+                  break;
+               default:
+                  break;
+            };
+
+            StandDef.CreateCountryList();
+            StandDef.CalculateSemi();
+            
+            alert("В финал прошли " + StandDef.SemiResults[0][0] + ", " + StandDef.SemiResults[1][0] + ", " +
+               StandDef.SemiResults[2][0] + ", " + StandDef.SemiResults[3][0] + "!");
+            switch (prompt("Введите \'stop\' для остановки, любой другой ввод для проведения 2го этапа.")) {
+               case "stop":
+                  alert(`${StandDef.SemiResults[0][0]} побеждает по результатам первого раунда!`);
+                  break;
+               default:
+                  StandDef.CalculateFinals();
+                  break;
+            };
+            break;
+      }
+
+
+
+
+
+   </script>
+</head>
+
+<body>
+</body>
+
+</html>
